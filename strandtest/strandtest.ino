@@ -33,7 +33,8 @@ Adafruit_NeoPixel strip(LED_COUNT, LED_PIN, NEO_GRB + NEO_KHZ800);
 //   NEO_RGB     Pixels are wired for RGB bitstream (v1 FLORA pixels, not v2)
 //   NEO_RGBW    Pixels are wired for RGBW bitstream (NeoPixel RGBW products)
 
-boolean isRedTeam;
+boolean isRedTeam = true;
+int timer = 0;
 
 // setup() function -- runs once at startup --------------------------------
 
@@ -51,9 +52,15 @@ void setup() {
 }
 
 void loop() {
-  if(isRedTeam) colorWipe(Color.Red,1);
-  else colorWipe(Color.Blue,1);
-  
+  if(isRedTeam) colorWipe(strip.Color(255,   0,   0), 50); //red
+  else colorWipe(strip.Color(0, 0, 255), 50); //blue
+
+  if(timer > 2) {
+    if(isRedTeam) isRedTeam = false;
+    else isRedTeam = true;
+    timer = 0;
+  }
+  timer++;
 }
 
 
@@ -135,6 +142,6 @@ void theaterChaseRainbow(int wait) {
   }
 }
 
-public void setTeamColor(boolean isRedTeamm) {
+void setTeamColor(boolean isRedTeamm) {
   isRedTeam = isRedTeamm;
 }
