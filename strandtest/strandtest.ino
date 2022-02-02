@@ -48,7 +48,7 @@ void setup() {
 
   strip.begin();           // INITIALIZE NeoPixel strip object (REQUIRED)
   strip.show();            // Turn OFF all pixels ASAP
-  strip.setBrightness(100); // Set BRIGHTNESS to about 1/5 (max = 255)
+  strip.setBrightness(50); // Set BRIGHTNESS to about 1/5 (max = 255)
 }
 
 void loop() {
@@ -62,8 +62,6 @@ void loop() {
     timer = 0;
   }
   timer++;
-  theaterChaseRainbow(50);
-  rainbow(1);
 }
 
 
