@@ -33,8 +33,6 @@ Adafruit_NeoPixel strip(LED_COUNT, LED_PIN, NEO_GRB + NEO_KHZ800);
 //   NEO_RGB     Pixels are wired for RGB bitstream (v1 FLORA pixels, not v2)
 //   NEO_RGBW    Pixels are wired for RGBW bitstream (NeoPixel RGBW products)
 
-boolean isRedTeam = true;
-int timer = 0;
 
 // setup() function -- runs once at startup --------------------------------
 
@@ -48,22 +46,27 @@ void setup() {
 
   strip.begin();           // INITIALIZE NeoPixel strip object (REQUIRED)
   strip.show();            // Turn OFF all pixels ASAP
-  strip.setBrightness(100); // Set BRIGHTNESS to about 1/5 (max = 255)
+  strip.setBrightness(50); // Set BRIGHTNESS to about 1/5 (max = 255)
 }
 
-void loop() {
-  
-  if(isRedTeam) colorWipe(strip.Color(255,   0,   0), 50); //red
-  else colorWipe(strip.Color(0, 0, 255), 50); //blue
 
-  if(timer > 0) {
-    if(isRedTeam) isRedTeam = false;
-    else isRedTeam = true;
-    timer = 0;
-  }
-  timer++;
-  theaterChaseRainbow(50);
-  rainbow(1);
+// loop() function -- runs repeatedly as long as board is on ---------------
+
+void loop() {
+  // Fill along the length of the strip in various colors...
+  //colorWipe(strip.Color(255,   0,   0), 50); // Red
+  //colorWipe(strip.Color(  0, 255,   0), 50); // Green
+  //colorWipe(strip.Color(  0,   0, 255), 50); // Blue
+
+
+  // Do a theater marquee effect in various colors...
+  //theaterChase(strip.Color(127, 127, 127), 50); // White, half brightness
+  //theaterChase(strip.Color(127,   0,   0), 50); // Red, half brightness
+  //theaterChase(strip.Color(  0,   0, 127), 50); // Blue, half brightness
+
+  rainbow(10);             // Flowing rainbow cycle along the whole strip
+  //theaterChaseRainbow(50); // Rainbow-enhanced theaterChase variant
+  
 }
 
 
@@ -143,8 +146,4 @@ void theaterChaseRainbow(int wait) {
       firstPixelHue += 65536 / 90; // One cycle of color wheel over 90 frames
     }
   }
-}
-
-void setTeamColor(boolean isRedTeamm) {
-  isRedTeam = isRedTeamm;
 }
