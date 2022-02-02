@@ -48,19 +48,22 @@ void setup() {
 
   strip.begin();           // INITIALIZE NeoPixel strip object (REQUIRED)
   strip.show();            // Turn OFF all pixels ASAP
-  strip.setBrightness(255); // Set BRIGHTNESS to about 1/5 (max = 255)
+  strip.setBrightness(100); // Set BRIGHTNESS to about 1/5 (max = 255)
 }
 
 void loop() {
+  
   if(isRedTeam) colorWipe(strip.Color(255,   0,   0), 50); //red
   else colorWipe(strip.Color(0, 0, 255), 50); //blue
 
-  if(timer > 2) {
+  if(timer > 0) {
     if(isRedTeam) isRedTeam = false;
     else isRedTeam = true;
     timer = 0;
   }
   timer++;
+  theaterChaseRainbow(50);
+  rainbow(1);
 }
 
 
