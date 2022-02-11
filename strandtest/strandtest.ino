@@ -12,7 +12,7 @@
 
 #include <Adafruit_NeoPixel.h>
 #ifdef __AVR__
- #include <avr/power.h> // Required for 16 MHz Adafruit Trinket
+#include <avr/power.h> // Required for 16 MHz Adafruit Trinket
 #endif
 
 // Which pin on the Arduino is connected to the NeoPixels?
@@ -33,8 +33,8 @@ Adafruit_NeoPixel strip(LED_COUNT, LED_PIN, NEO_GRB + NEO_KHZ800);
 //   NEO_RGB     Pixels are wired for RGB bitstream (v1 FLORA pixels, not v2)
 //   NEO_RGBW    Pixels are wired for RGBW bitstream (NeoPixel RGBW products)
 
-boolean isRedTeam = true;
-int timer = 0;
+int redPin = 9, greenPin = 8, yellowPin = 10;
+boolean flip = false;
 
 // setup() function -- runs once at startup --------------------------------
 
@@ -44,24 +44,35 @@ void setup() {
 #if defined(__AVR_ATtiny85__) && (F_CPU == 16000000)
   clock_prescale_set(clock_div_1);
 #endif
- // END of Trinket-specific code.
+  // END of Trinket-specific code.
+
+  pinMode(redPin, INPUT);
+  pinMode(greenPin, INPUT);
+  pinMode(yellowPin, INPUT);
 
   strip.begin();           // INITIALIZE NeoPixel strip object (REQUIRED)
   strip.show();            // Turn OFF all pixels ASAP
-  strip.setBrightness(50); // Set BRIGHTNESS to about 1/5 (max = 255)
+  strip.setBrightness(255); // Set BRIGHTNESS to about 1/5 (max = 255)
 }
 
 void loop() {
-  
-  if(isRedTeam) colorWipe(strip.Color(255,   0,   0), 50); //red
-  else colorWipe(strip.Color(0, 0, 255), 50); //blue
 
-  if(timer > 0) {
-    if(isRedTeam) isRedTeam = false;
-    else isRedTeam = true;
-    timer = 0;
+  //colorWipe(strip.Color(255,   0,   0), 50); // Red
+  //colorWipe(strip.Color(  0, 255,   0), 50); // Green
+  //colorWipe(strip.Color(  0,   0, 255), 50); // Blue
+  if (!digitalRead(redPin)) {
+    doubleColorWipe(strip.Color(178, 10, 10), 50);
+    doubleColorWipe(strip.Color(128, 0, 0), 50);
+    doubleColorWipe(strip.Color(220, 20, 60), 50);
   }
-  timer++;
+  else {
+    doubleColorWipe(strip.Color(0, 255, 255), 50);
+    doubleColorWipe(strip.Color(10, 10, 178), 50);
+    doubleColorWipe(strip.Color(100, 20, 220), 50);
+  }
+
+
+
 }
 
 
@@ -73,10 +84,30 @@ void loop() {
 // strip.Color(red, green, blue) as shown in the loop() function above),
 // and a delay time (in milliseconds) between pixels.
 void colorWipe(uint32_t color, int wait) {
-  for(int i=0; i<strip.numPixels(); i++) { // For each pixel in strip...
+  for (int i = 0; i < strip.numPixels(); i++) { // For each pixel in strip...
     strip.setPixelColor(i, color);         //  Set pixel's color (in RAM)
     strip.show();                          //  Update strip to match
     delay(wait);                           //  Pause for a moment
+  }
+}
+
+void doubleColorWipe(uint32_t color, int wait) {
+  if (!flip) {
+    for (int i = 0; i < strip.numPixels() + 1 / 2; i++) {
+      strip.setPixelColor(i, color*(strip.Color(0,0,1)*i));
+      strip.setPixelColor(LED_COUNT - i, color*(strip.Color(0,0,1)*i));
+      strip.show();
+      delay(wait);
+    }
+    flip = true;
+  } else {
+    for (int i = 0; i < strip.numPixels() + 1 / 2; i++) {
+      strip.setPixelColor(strip.numPixels()/2 - i, color *(1+(i/30)));
+      strip.setPixelColor(strip.numPixels()/2 + i, color *(1+(i/30)));
+      strip.show();
+      delay(wait);
+    }   
+    flip = false; 
   }
 }
 
@@ -84,11 +115,11 @@ void colorWipe(uint32_t color, int wait) {
 // a la strip.Color(r,g,b) as mentioned above), and a delay time (in ms)
 // between frames.
 void theaterChase(uint32_t color, int wait) {
-  for(int a=0; a<10; a++) {  // Repeat 10 times...
-    for(int b=0; b<3; b++) { //  'b' counts from 0 to 2...
+  for (int a = 0; a < 10; a++) { // Repeat 10 times...
+    for (int b = 0; b < 3; b++) { //  'b' counts from 0 to 2...
       strip.clear();         //   Set all pixels in RAM to 0 (off)
       // 'c' counts up from 'b' to end of strip in steps of 3...
-      for(int c=b; c<strip.numPixels(); c += 3) {
+      for (int c = b; c < strip.numPixels(); c += 3) {
         strip.setPixelColor(c, color); // Set pixel 'c' to value 'color'
       }
       strip.show(); // Update strip with new contents
@@ -103,8 +134,8 @@ void rainbow(int wait) {
   // Color wheel has a range of 65536 but it's OK if we roll over, so
   // just count from 0 to 5*65536. Adding 256 to firstPixelHue each time
   // means we'll make 5*65536/256 = 1280 passes through this outer loop:
-  for(long firstPixelHue = 0; firstPixelHue < 5*65536; firstPixelHue += 256) {
-    for(int i=0; i<strip.numPixels(); i++) { // For each pixel in strip...
+  for (long firstPixelHue = 0; firstPixelHue < 5 * 65536; firstPixelHue += 256) {
+    for (int i = 0; i < strip.numPixels(); i++) { // For each pixel in strip...
       // Offset pixel hue by an amount to make one full revolution of the
       // color wheel (range of 65536) along the length of the strip
       // (strip.numPixels() steps):
@@ -124,11 +155,11 @@ void rainbow(int wait) {
 // Rainbow-enhanced theater marquee. Pass delay time (in ms) between frames.
 void theaterChaseRainbow(int wait) {
   int firstPixelHue = 0;     // First pixel starts at red (hue 0)
-  for(int a=0; a<30; a++) {  // Repeat 30 times...
-    for(int b=0; b<3; b++) { //  'b' counts from 0 to 2...
+  for (int a = 0; a < 30; a++) { // Repeat 30 times...
+    for (int b = 0; b < 3; b++) { //  'b' counts from 0 to 2...
       strip.clear();         //   Set all pixels in RAM to 0 (off)
       // 'c' counts up from 'b' to end of strip in increments of 3...
-      for(int c=b; c<strip.numPixels(); c += 3) {
+      for (int c = b; c < strip.numPixels(); c += 3) {
         // hue of pixel 'c' is offset by an amount to make one full
         // revolution of the color wheel (range 65536) along the length
         // of the strip (strip.numPixels() steps):
@@ -141,8 +172,4 @@ void theaterChaseRainbow(int wait) {
       firstPixelHue += 65536 / 90; // One cycle of color wheel over 90 frames
     }
   }
-}
-
-void setTeamColor(boolean isRedTeamm) {
-  isRedTeam = isRedTeamm;
 }
