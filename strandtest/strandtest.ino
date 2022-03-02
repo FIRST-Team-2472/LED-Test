@@ -17,7 +17,7 @@
 
 // Which pin on the Arduino is connected to the NeoPixels?
 // On a Trinket or Gemma we suggest changing this to 1:
-#define LED_PIN    6
+#define LED_PIN 6
 
 // How many NeoPixels are attached to the Arduino?
 #define LED_COUNT 60
@@ -33,8 +33,16 @@ Adafruit_NeoPixel strip(LED_COUNT, LED_PIN, NEO_GRB + NEO_KHZ800);
 //   NEO_RGB     Pixels are wired for RGB bitstream (v1 FLORA pixels, not v2)
 //   NEO_RGBW    Pixels are wired for RGBW bitstream (NeoPixel RGBW products)
 
-int redPin = 9, greenPin = 8, yellowPin = 10;
+int redPin = 9;
+int greenPin = 8;
+int yellowPin = 10;
+int wee = 10;
 boolean flip = false;
+
+
+uint32_t lightPink = strip.Color(178, 10, 10);
+uint32_t red = strip.Color(255, 0, 0);
+uint32_t orange = strip.Color(255, 25, 0);
 
 // setup() function -- runs once at startup --------------------------------
 
@@ -49,26 +57,44 @@ void setup() {
   pinMode(redPin, INPUT);
   pinMode(greenPin, INPUT);
   pinMode(yellowPin, INPUT);
+  pinMode(LED_PIN, OUTPUT);
+  Serial.begin(9600);
+  
+  Serial.print("\non");
 
   strip.begin();           // INITIALIZE NeoPixel strip object (REQUIRED)
   strip.show();            // Turn OFF all pixels ASAP
-  strip.setBrightness(255); // Set BRIGHTNESS to about 1/5 (max = 255)
+  strip.setBrightness(100); // Set BRIGHTNESS to about 1/5 (max = 255)
+
+  /*boolean[] done;
+  done = new boolean[strip.numPixels()]
+  done = false;*/
+
 }
 
 void loop() {
+  //strip.setPixelColor(1, strip.Color(178, 10, 10));
+  Serial.print("\nYellow ");
+  Serial.print(digitalRead(yellowPin));
+  Serial.print("\nRED ");
+  Serial.print(digitalRead(redPin));
+  Serial.print("\nGreen ");
+  Serial.print(digitalRead(greenPin));
 
+  
   //colorWipe(strip.Color(255,   0,   0), 50); // Red
   //colorWipe(strip.Color(  0, 255,   0), 50); // Green
   //colorWipe(strip.Color(  0,   0, 255), 50); // Blue
+  
   if (!digitalRead(redPin)) {
-    doubleColorWipe(strip.Color(178, 10, 10), 50);
-    doubleColorWipe(strip.Color(128, 0, 0), 50);
-    doubleColorWipe(strip.Color(220, 20, 60), 50);
+    doubleColorWipe(lightPink, 50);
+    randomColorWipe(red, 10);
+    doubleColorWipe(orange, 50);
   }
   else {
-    doubleColorWipe(strip.Color(0, 255, 255), 50);
-    doubleColorWipe(strip.Color(10, 10, 178), 50);
-    doubleColorWipe(strip.Color(100, 20, 220), 50);
+    randomColorWipe(strip.Color(0, 127, 128), wee);
+    randomColorWipe(strip.Color(10, 10, 128), wee);
+    randomColorWipe(strip.Color(40, 10, 120), wee);
   }
 
 
@@ -91,24 +117,58 @@ void colorWipe(uint32_t color, int wait) {
   }
 }
 
+void randomColorWipe(uint32_t color, int wait) {
+
+  for (int i = 0; i < strip.numPixels(); i++) { // For each pixel in strip...
+    strip.setPixelColor(random(0, 60), color);         //  Set pixel's color (in RAM)
+    strip.show();                          //  Update strip to match
+    delay(wait);                           //  Pause for a moment
+  }
+}
+
 void doubleColorWipe(uint32_t color, int wait) {
   if (!flip) {
-    for (int i = 0; i < strip.numPixels() + 1 / 2; i++) {
-      strip.setPixelColor(i, color*(strip.Color(0,0,1)*i));
-      strip.setPixelColor(LED_COUNT - i, color*(strip.Color(0,0,1)*i));
+    for (int i = 0; i < strip.numPixels() / 2; i++) {
+      strip.setPixelColor(i, color);
+      strip.setPixelColor(strip.numPixels() - i - 1, color);
       strip.show();
       delay(wait);
     }
     flip = true;
   } else {
-    for (int i = 0; i < strip.numPixels() + 1 / 2; i++) {
-      strip.setPixelColor(strip.numPixels()/2 - i, color *(1+(i/30)));
-      strip.setPixelColor(strip.numPixels()/2 + i, color *(1+(i/30)));
+    for (int i = 0; i < strip.numPixels() / 2; i++) {
+      strip.setPixelColor(strip.numPixels()/2 - i, color);
+      strip.setPixelColor(strip.numPixels()/2 + i, color);
       strip.show();
       delay(wait);
     }   
     flip = false; 
   }
+}
+
+void bubble(uint32_t color, int wait) {
+    
+}
+
+void funkyDoubleColorWipe(uint32_t color, int wait) {
+  if (!flip) {
+    for (int i = 0; i < strip.numPixels() / 2; i++) {
+      strip.setPixelColor(i, color+(i*4));
+      strip.setPixelColor(strip.numPixels() - i - 1, color+(i*4));
+      strip.show();
+      delay(wait);
+    }
+    flip = true;
+  } else {
+    for (int i = 0; i < strip.numPixels() / 2; i++) {
+      strip.setPixelColor(strip.numPixels()/2 - i, color+(i*4));
+      strip.setPixelColor(strip.numPixels()/2 + i, color+(i*4));
+      strip.show();
+      delay(wait);
+    }   
+    flip = false; 
+  }
+  wee = random(40,100);
 }
 
 // Theater-marquee-style chasing lights. Pass in a color (32-bit value,
