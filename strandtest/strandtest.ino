@@ -122,17 +122,17 @@ void bubble(int color[], int wait) {
 
   do {
     for (int i = 0; i < sizeof(ledArray); i++) {
-      int shine = rand()%1;
-      if (shine = 1) {
-        ledDone[i] = !moveToColor(i, color);
-      }
+	  srand(time(0));
+      if (rand()%2 == 0) ledDone[i] = !moveToColor(i, color);
 
       done = true;
-      for (boolean led: ledDone)
+      for (boolean led: ledDone) {
         if (!led) {
           done = false;
           break;  
         }
+	  }
+	  
       delay(wait);
     }
   }
