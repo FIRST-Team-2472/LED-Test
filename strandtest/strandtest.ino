@@ -4,6 +4,7 @@
 #include <avr/power.h> // Required for 16 MHz Adafruit Trinket
 #endif
 
+
 // Which pin on the Arduino is connected to the NeoPixels?
 // On a Trinket or Gemma we suggest changing this to 1:
 #define LED_PIN 6
@@ -27,6 +28,7 @@ boolean flip = false;
 int lightPink[3] = {178, 10, 10};
 int red[3] = {255, 0, 0};
 int orange[3] = {255, 25, 0};
+int blank[3] = {0,0,0};
 
 int ledArray[LED_COUNT][3];
 
@@ -52,6 +54,8 @@ void setup() {
   strip.show();            // Turn OFF all pixels ASAP
   strip.setBrightness(100); // Set BRIGHTNESS to about 1/5 (max = 255)
 
+  setColor(blank);
+
 }
 
 void loop() {
@@ -69,7 +73,7 @@ void loop() {
 
   if (!digitalRead(redPin)) {
     doubleColorWipe(lightPink, 50);
-    randomColorWipe(red, 10);
+    bubble(red, 10);
     doubleColorWipe(orange, 50);
   }
   else {
@@ -117,13 +121,12 @@ void doubleColorWipe(int color[], int wait) {
 void bubble(int color[], int wait) {
   boolean done;
   boolean ledDone[LED_COUNT]; 
-  for (int i = 0; i < sizeof(ledDone); i++) 
+  for (int i = 0; i < LED_COUNT; i++) 
     ledDone[i] = false;
 
   do {
-    for (int i = 0; i < sizeof(ledArray); i++) {
-	  srand(time(0));
-      if (rand()%2 == 0) ledDone[i] = !moveToColor(i, color);
+    for (int i = 0; i < LED_COUNT; i++) {
+      if (random(2) == 0) ledDone[i] = !moveToColor(i, color);
 
       done = true;
       for (boolean led: ledDone) {
@@ -131,8 +134,7 @@ void bubble(int color[], int wait) {
           done = false;
           break;  
         }
-	  }
-	  
+      }
       delay(wait);
     }
   }
