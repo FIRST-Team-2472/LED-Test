@@ -73,7 +73,7 @@ void loop() {
 
   if (!digitalRead(redPin)) {
     doubleColorWipe(lightPink, 50);
-    bubble(red, 10);
+    doubleColorWipe(red, 10);
     doubleColorWipe(orange, 50);
   }
   else {
